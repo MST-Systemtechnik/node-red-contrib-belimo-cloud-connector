@@ -99,7 +99,7 @@ module.exports = function (RED) {
                             }
     
                             // Send data
-                            if(!config.from_date && !config.to_date && msg.payload.value !== null){
+                            if(msg.payload.value !== null){
                                 node.send(utility.createPayload(msg.payload.value, label, msg.payload.timestamp))
                             }
                         }
