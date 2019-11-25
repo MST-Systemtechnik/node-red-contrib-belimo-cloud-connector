@@ -1,0 +1,59 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * 
+ * View for belimo-oauth config node.
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-oauth',{
+        category: 'config',
+        defaults: {
+            name : { value : ""}
+        },
+        credentials: {
+            client_id: {type:"text"},
+            client_secret: {type:"password"}
+        },
+        label: function() {
+            return this.name || 'Belimo-OAuth'
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="belimo-oauth">
+
+    <div class="form-row">
+            <label for="node-config-input-name">Name</label>
+            <input type="text" id="node-config-input-name">
+    </div>
+
+    <div class="form-row">
+            <label for="node-config-input-client_id">Client-ID *</label>
+            <input type="text" id="node-config-input-client_id" required>
+    </div>
+
+    <div class="form-row">
+            <label for="node-config-input-client_secret">Client-Secret *</label>
+            <input type="password" id="node-config-input-client_secret" required>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="belimo-oauth">
+    <p>Create a oauth configuration.</p>
+
+    <h3>Details</h3>
+    Authentication using OAuth. This requires a client-ID, a client-secret and a registered user.  
+    Without these parameters, no connection can be established.
+
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+</script>

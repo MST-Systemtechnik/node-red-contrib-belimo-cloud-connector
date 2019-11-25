@@ -1,0 +1,262 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * 
+ * View for the belimo-datapoint
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-datapoint', {
+        category: 'Belimo Cloud',
+        defaults: {
+            name : { value : ""},
+            oauth: {value:"", type: "belimo-oauth", required:true},
+            reference : { value : "" },
+            dataprofile_value : { value : "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-bullseye",
+        color: "#FD6701",
+        label: function () {
+  
+    
+            return this.name ? 'Data: ' + this.name : "Datapoint"
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic":""
+        },
+        oneditprepare: function () {
+            var self = this
+            // Build the selection options by the devices
+            buildSelectDataprofiles(this)
+
+            // Listen on blur event to get the profile list
+            $('#node-input-reference').blur(function(){
+                self.reference = this.value
+                buildSelectDataprofiles(self)
+            })
+
+            // Listen on changes on profile to get the correct name
+            $('#node-input-dataprofile_value').change(function(){
+               if(this.value){
+                    let data = JSON.parse(this.value)
+                    self.name = getDisplayNameFromProfile(data)
+
+                    var max_length = 32
+
+                    if(self.name.length > max_length){
+                        self.name = self.name.substr(0, max_length) + '...'
+                    }
+               }
+            })
+        }
+    });
+
+    
+    function buildSelectDataprofiles(self){
+
+        // Clear the options to rebuild after the request
+        $("#node-input-dataprofile_value").find('option').not(':first').remove();
+        // Request
+
+        $.getJSON('belimo-cloud/datapoint-node/' + self.id + ( self.reference ? '?reference=' + self.reference : '' ),function(data) {
+
+            // No devices received
+            if(data.err){  
+                RED.notify(data.err, "error")    
+                return null
+            }
+            
+            // Append the options
+            for(var profile_index in data.datapoints){
+
+                // Stringify the whole profile to put this into value of the option
+                var datapoint_str = JSON.stringify(data.datapoints[profile_index])
+                
+                var name = getDisplayNameFromProfile(data.datapoints[profile_index])
+
+                var max_length = 64
+
+                if(name.length > max_length){
+                    name = name.substr(0, max_length) + '...'
+                }
+                $('#node-input-dataprofile_value').append(
+                    $('<option>', {
+                        value: datapoint_str,
+                        text: name
+                    }).prop('selected', datapoint_str === self.dataprofile_value)
+                );
+            }
+
+
+            $('#node-input-dataprofile_value').change(function(){
+
+                let val = $(this).val()
+                if( !(val == 'all' && val === 'none' ) ){
+                    val = JSON.parse(val)
+                    val = val.id
+                }
+
+                $.get('belimo-cloud/datapoint-node-changed/' + self.id + '?datapointId=' + val)
+            });
+            
+        });
+
+    }
+
+    function getDisplayNameFromProfile(profile){
+        let name = null
+        for(var key in profile.featureValues){
+            if(key.endsWith('displayname')){
+                name = profile.featureValues[key]
+                break
+            }
+        }
+
+        return name || profile.id
+    }
+
+</script>
+
+<script type="text/x-red" data-template-name="belimo-datapoint">
+
+    <div class="form-row">
+            <label for="node-input-oauth">OAuth</label>
+            <input type="text" id="node-input-oauth">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-reference">Reference</label>
+            <input type="text" id="node-input-reference" placeholder="Example : '/energyvalve3/1.2'">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-dataprofile_value">Datapoint</label>
+            <select id="node-input-dataprofile_value">
+                <option value="" disabled>Select a profile</option>
+            </select>
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="belimo-datapoint">
+    <p>Belimo-Cloud datapoint node.</p>
+
+    <h3>Inputs</h3>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : device | object</span></dt>
+        <dd>Belimo Device </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : datapointId | string</span></dt>
+        <dd>Datapoint-ID to handle with. Given from dataprofile. A dataprofile must exists.</dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : write | any</span></dt>
+        <dd>Write datapoint. To write the selected datapoint, emit a payload with the value and a label with 'write'.<br>
+
+            <pre>
+                    {
+                        topic : 'write',
+                        payload: ''
+                    }
+            </pre>
+
+            When a object is passed, it will write the specific datapoint defined in object. Example payload:
+            <pre>
+                    {
+                        "mergeable" : false,
+                        "cancelable" : true,
+                        "datapoints" : {
+                            "772bpRFm.1" : 27.53,
+                            "772bpRFm.3" : "CLOSE",
+                            "772bpRFm.4" : true
+                        }
+                    }
+            </pre>
+        </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : metadata | object</span></dt>
+        <dd>Write metadata. Example:
+            <pre>
+                    {
+                        "datapoints" : {
+                            "metadata.1001" : "Basement B14.22",
+                            "metadata.1008" : "8005",
+                            "metadata.1009" : "Zurich"
+                        }
+                    }
+            </pre>
+
+        </dd>
+    </dl>
+
+
+
+    <h3>Outputs</h3>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : dataprofile | object</span></dt>
+            <dd>Object with dataprofile-names and deivce-id's</dd>
+        </dl>
+
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : write | object</span></dt>
+            <dd>Write job</dd>
+        </dl>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : data | object</span></dt>
+            <dd>Actual data-object of the selected datapoint. Example:
+                <pre>
+                        {
+                            id: "evcloud.210"
+                            deviceId: "6b61569e-26d8-40cb-a1e2-07c712cf138c"
+                            value: 4117259188.5645156
+                            topic: "6b61569e-26d8-40cb-a1e2-07c712cf138c/evcloud.210"
+                            timestamp: "2019-11-18T16:15:35.505Z"
+                            displayname: "Heating Energy"
+                            displayunit: "si=kilowattHour,uscs=kiloBritishThermalUnit"
+                            visibility: "normal"
+                            access: "r"
+                            basetype: "real"
+                            description: "Heating Energy in J"
+                            name: "Heating_E_J"
+                            privacy: "false"
+                            restriction: "b32"
+                            unit: "joule"
+                        }
+                </pre>
+            </dd>
+        </dl>
+
+
+
+    <h3>Details</h3>
+    To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description bellow.
+    <pre>
+        {
+            topic : '...',
+            payload: ''
+        }
+    </pre>
+    
+    When a datapoint is selected, a subscription will be started. The actual data will be fired by a server-side-event (sse) given from the belimo-cloud change-stream.
+
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+</script>

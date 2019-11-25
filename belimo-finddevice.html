@@ -1,0 +1,80 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * 
+ *  View for belimo-finddevice node.
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-finddevice', {
+        category: 'Belimo Cloud',
+        defaults: {
+            oauth: {value:"", type: "belimo-oauth", required:true},
+            serial_number : { value : "", required : false }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-search",
+        color: "#FD6701",
+        label: function () {
+            return this.serial_number ? 'Serial: ' + this.serial_number : "Belimo-Finddevice"
+        },
+        labelStyle: function() {
+            return this.serial_number ? "node_label_italic":""
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="belimo-finddevice">
+
+    <div class="form-row">
+            <label for="node-input-oauth">OAuth</label>
+            <input type="text" id="node-input-oauth">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-serial_number">Serial</label>
+        <input type="text" id="node-input-serial_number">
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="belimo-finddevice">
+    <p>Belimo-Cloud device by search node.</p>
+
+    <h3>Inputs</h3>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : serialNumber | string</span></dt>
+        <dd>Get device by search </dd>
+    </dl>
+
+    <h3>Outputs</h3>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : device | object</span></dt>
+            <dd>Selected device</dd>
+        </dl>
+
+
+    <h3>Details</h3>
+    To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description above.
+    <pre>
+        {
+            topic : '...',
+            payload: ''
+        }
+    </pre>
+    
+    Search a device by a given serial-number.
+
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+</script>

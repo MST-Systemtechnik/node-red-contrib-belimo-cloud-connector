@@ -1,0 +1,168 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * Version: 0.1
+ * 
+ * TODO Descrition
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-historical', {
+        category: 'Belimo Cloud',
+        defaults: {
+            oauth: {value:"", type: "belimo-oauth", required:true},
+            resolution : { value : "15m", required : true },
+            from_date : { value : "" },
+            from_time : { value : "" },
+            to_date : { value : "" },
+            to_time : { value : "" }
+
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-line-chart",
+        color: "#FD6701",
+        label: function () {
+            return "Historical"
+        },
+        labelStyle: function() {
+            return this.resolution ? "node_label_italic":""
+        },
+        oneditprepare: function () {
+            // Build the selection options by the devices
+            $( "#node-input-from_date" ).datepicker()
+            $( "#node-input-to_date" ).datepicker()
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="belimo-historical">
+
+    <div class="form-row">
+            <label for="node-input-oauth">OAuth</label>
+            <input type="text" id="node-input-oauth">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-resolution" required>Resolution *</label>
+        <select id="node-input-resolution">
+            <option value="1s">1s</option>
+            <option value="5s">5s</option>
+            <option value="15s">15s</option>
+            <option value="30s">30s</option>
+            <option value="1m">1m</option>
+            <option value="5m">5m</option>
+            <option value="15m" selected>15m</option>
+            <option value="30m">30m</option>
+            <option value="1h">1h</option>
+            <option value="6h">6h</option>
+            <option value="12h">12h</option>
+            <option value="1d">1d</option>
+            <option value="7d">7d</option>
+        </select>
+    </div>
+
+
+    <div class="form-row">
+        <label for="node-input-from_date">From</label>
+        <input type="text" id="node-input-from_date" style="width:25%" placeholder="Date">
+        <input type="time" id="node-input-from_time" step="1" style="width:20%">
+    </div>
+
+        
+    <div class="form-row">
+        <label for="node-input-to_date">To</label>
+        <input type="text" id="node-input-to_date" style="width:25%" placeholder="Date">
+        <input type="time" id="node-input-to_time" step="1" style="width:20%">
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="belimo-historical">
+    <p>Belimo-Cloud historical node.</p>
+
+    <h3>Inputs</h3>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : from | object</span></dt>
+        <dd>From - data and timestamp for dataseries range
+            <pre>
+            {
+                date : '12/24/2019',
+                time : '00:00:00'
+            }
+            </pre>
+        </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : to | object</span></dt>
+        <dd>To - data and timestamp for dataseries range 
+            <pre>
+            {
+                date : '12/24/2019',
+                time : '00:00:00'
+            }
+            </pre>
+        </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : resolution | string</span></dt>
+        <dd>Resolution for the query. Pick one.
+            <code>
+            1s, 5s, 15s, 30s, 1m, 5m, 15m, 30m, 1h, 6h, 12h, 1d, 7d
+            </code>
+        </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : data | object</span></dt>
+        <dd>Data-object with the actual value and the timestamp from this data. Check belimo-datapoint node for the struct.</dd>
+    </dl>
+
+
+
+    <h3>Outputs</h3>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : historical | object</span></dt>
+            <dd>Timeseries of a dataset. Check ui-dashboard chart struct.</dd>
+        </dl>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : 'displayname [ unit ]' | string</span></dt>
+            <dd>Actual Value for displaying live-data
+                <pre>
+                {
+                    "payload":4120049354.951748,
+                    "topic":"Heating Energy [joule]",
+                    "timestamp":"2019-11-18T16:41:10.134Z",
+                    "_msgid":"3ce9fbf0.f74f24"
+                }
+                </pre>
+            </dd>
+        </dl>
+
+
+    <h3>Details</h3>
+    To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description bellow.
+    <pre>
+        {
+            topic : '...',
+            payload: ''
+        }
+    </pre>
+    
+    To display datasets from the past, a from- to-range must be entered. When from-date and to-date-range is empty, live data will be transmitted. When a range is queryied, all other datasets will be lost. But the data is also stored, by the belimo-cloud.
+
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+</script>

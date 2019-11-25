@@ -1,0 +1,164 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * 
+ * View for the belimo-device node.
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-devices', {
+        category: 'Belimo Cloud',
+        defaults: {
+            name : { value : "" },
+            oauth: {value:"", type: "belimo-oauth", required:true},
+            device_id : { value : "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-cube",
+        color: "#FD6701",
+        label: function () {
+            return this.name ? 'Device: ' + this.name : "Belimo-devices"
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic":""
+        },
+        oneditprepare: function () {
+            // Build the selection options by the devices
+            buildSelectDevices(this)
+        }
+    });
+
+
+    function buildSelectDevices(self, callback){
+
+        // Clear the options to rebuild after the request
+        $("#node-input-device_id").find('option').not(":nth-child(1)").not(":nth-child(2)").remove()
+
+        // Request
+        $.getJSON('belimo-cloud/device-node/' + self.id,function(data) {
+
+            // No devices received
+            if(data.err){  
+                RED.notify(data.err, "error")    
+                return null
+            }
+
+            // Append the options
+            for(var device_index in data.data){
+                $('#node-input-device_id').append(
+                    $('<option>', 
+                        { 
+                            value: data.data[device_index].id, 
+                            text: data.data[device_index].displayName
+                        }
+                    ).prop('selected', data.data[device_index].id === self.device_id)
+                );
+            }
+
+
+            // Display the name of the selected device
+            $('#node-input-device_id').change(function(){
+                self.name = $(this).find(':selected').text()
+                $.get('belimo-cloud/device-node-changed/' + self.id + '?deviceId=' + $(this).val())
+            })
+        })
+    }
+</script>
+
+<script type="text/x-red" data-template-name="belimo-devices">
+
+    <div class="form-row">
+            <label for="node-input-oauth">OAuth</label>
+            <input type="text" id="node-input-oauth">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-device_id">Device</label>
+        <select id="node-input-device_id">
+            <option value="" disabled>Select a device</option>
+            <option value="none">No device</option>
+            <option value="all">All devices</option>
+        </select>
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="belimo-devices">
+    <p>Belimo-Cloud device node.</p>
+
+    <h3>Inputs</h3>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : deviceId | string</span></dt>
+        <dd>Get device by id. </dd>
+    </dl>
+
+    <h3>Outputs</h3>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : devices | object</span></dt>
+            <dd>Object with device-names and deivce-id's</dd>
+        </dl>
+
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : device | object</span></dt>
+            <dd>Selected device</dd>
+        </dl>
+
+
+    <h3>Details</h3>
+    To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description bellow.
+    <pre>
+        {
+            topic : '...',
+            payload: ''
+        }
+    </pre>
+    
+    A device can be selected in the dropdown-list, or while emit a deviceId in the input. It's possible to send all devices to the output, while selecting the option 'all'.
+
+    Example payload all devices
+    <pre>
+        [
+            {device},{device},...
+        ]
+    </pre>
+
+    Example payload single device
+    <pre>
+        {
+            id: "98c131c0-30d2-43a7-9017-b990a245d45d"
+            productionId: "MPUID174730292135"
+            displayName: "Client API Test EV"
+            serialNumber: "21747-30292-022-135"
+            materialNumber: "LR24A-EV15A"
+            deviceType: "2"
+            productionDate: "2017-11-28T08:52:57.000Z"
+            purpose: "PRODUCT"
+            dataprofile: object
+            software: object
+            runningSoftwareModules: object
+            health: object
+            owner: object
+            projectName: "client API"
+            addressCity: "Hinwil"
+            addressCountry: "CH"
+            remoteControlEnabled: true
+            claimingProtectionActive: false
+            state: object
+        }
+    </pre>
+
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+
+</script>

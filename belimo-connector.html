@@ -1,0 +1,111 @@
+<!--
+ /*
+ * Company: MST Systemtechnik AG
+ * Customer: Belimo AG
+ * Author: mst_gruy
+ * Date: 05.11.2019
+ * 
+ * Belimo-Cloud connector node to connect to the belimo cloud. This is the configuration node for the connection.
+ */
+-->
+
+<script type="text/javascript">
+    RED.nodes.registerType('belimo-connector',{
+        category: 'Belimo Cloud',
+        defaults: {
+            name : { value : ""},
+            oauth: {value:"", type: "belimo-oauth", required:true}
+        },
+        credentials: {
+            username: {type:"text"},
+            password: {type:"password"}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-sign-in",
+        color: "#FD6701",
+        label: function() {
+            return this.name || "Belimo-Connector"
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic":"";
+        },
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="belimo-connector">
+
+    <div class="form-row">
+            <label for="node-input-name">Name</label>
+            <input type="text" id="node-input-name">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-oauth">OAuth</label>
+            <input type="text" id="node-input-oauth">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-username">Username</label>
+            <input type="email" id="node-input-username">
+    </div>
+
+    <div class="form-row">
+            <label for="node-input-password">Password</label>
+            <input type="password" id="node-input-password">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="belimo-connector">
+    <p>Belimo-Cloud connector node.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : username | string</span></dt>
+        <dd>Username as email </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : password | string</span></dt>
+        <dd>Password </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : login | null</span></dt>
+        <dd>Fires the login-event </dd>
+    </dl>
+
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Topic : logout | null</span></dt>
+        <dd>Fires the logout-event </dd>
+    </dl>
+
+    <h3>Outputs</h3>
+
+    <dl class="message-properties">
+            <dt>payload <span class="property-type">Topic : status | null</span></dt>
+            <dd>Status messages</dd>
+        </dl>
+
+    <h3>Details</h3>
+    To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description bellow.
+    <pre>
+        {
+            topic : '...',
+            payload: ''
+        }
+    </pre>
+    
+    When the username and password is entred via the input, a login or logout event can be fired, while triggering the input with a payload and the topics 'login' or 'logout'.
+
+    <ul>
+        <li>Create an OAuth config instance</li>
+        <li>Enter the username and password in the backend or via the input.</li>
+    </ul>
+    
+    <h3>References</h3>
+    <ul>
+        <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>
+    </ul>
+</script>
