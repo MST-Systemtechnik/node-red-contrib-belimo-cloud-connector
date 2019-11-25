@@ -81,7 +81,7 @@ Below is an example flow that shows how to use the library. The Belimo-Connector
 #### Example Dependenices
 - dynamic_frontend.json - `npm i node-red-dashboard`
 
-
+#### Simple Example
 ![Example flow img](examples/example_flow.png)
 
 
