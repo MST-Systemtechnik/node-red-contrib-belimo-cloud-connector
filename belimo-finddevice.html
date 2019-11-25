@@ -67,12 +67,35 @@
     <pre>
         {
             topic : '...',
-            payload: ''
+            payload: 'value'
         }
     </pre>
     
     Search a device by a given serial-number.
-
+    Example payload for device
+    <pre>
+        {
+            id: "98c131c0-30d2-43a7-9017-b990a245d45d"
+            productionId: "MPUID174730292135"
+            displayName: "Client API Test EV"
+            serialNumber: "21747-30292-022-135"
+            materialNumber: "LR24A-EV15A"
+            deviceType: "2"
+            productionDate: "2017-11-28T08:52:57.000Z"
+            purpose: "PRODUCT"
+            dataprofile: object
+            software: object
+            runningSoftwareModules: object
+            health: object
+            owner: object
+            projectName: "client API"
+            addressCity: "Hinwil"
+            addressCountry: "CH"
+            remoteControlEnabled: true
+            claimingProtectionActive: false
+            state: object
+        }
+    </pre>
     <h3>References</h3>
     <ul>
         <li>Cloud Developer Space <a href="https://www.belimo.com/iot/developers">Link</a></li>

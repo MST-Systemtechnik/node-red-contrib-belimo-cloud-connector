@@ -85,17 +85,23 @@ module.exports = function (RED) {
                     case 'data':
 
                         node.datapoint = msg.payload
-                        let label = createLabelName(msg.payload)
 
-                        // Reset chart if not the same dp
-                        if(node.label !== label){
-                            node.send(utility.createPayload([]))
-                            node.label = label
-                        }
+                        // Get the dataset when certains topic arrived on input
+                        if( config.from_date ||  config.to_date ){
+                            processSeries()
+                        }else{
+                            let label = createLabelName(msg.payload)
 
-                        // Send data
-                        if(!config.from_date && !config.to_date && msg.payload.value !== null){
-                            node.send(utility.createPayload(msg.payload.value, label, msg.payload.timestamp))
+                            // Reset chart if not the same dp
+                            if(node.label !== label){
+                                node.send(utility.createPayload([]))
+                                node.label = label
+                            }
+    
+                            // Send data
+                            if(!config.from_date && !config.to_date && msg.payload.value !== null){
+                                node.send(utility.createPayload(msg.payload.value, label, msg.payload.timestamp))
+                            }
                         }
 
                     break
@@ -105,30 +111,37 @@ module.exports = function (RED) {
             }
 
             // Get the dataset when certains topic arrived on input
-            if(msg.topic === 'from' || msg.topic === 'to' || msg.topic === 'resolution'){
-                handleSeries(function(err, data){
-                    if(err){
-                        node.warn( utility.warnError(node_name, err) )
-                        node.status(utility.statusError())
-                    }else{
-                        if(data.errors){
-                            node.warn( utility.warnError(node_name, JSON.stringify(data.errors)) )
-                            return null
-                        }else{
-                            node.status(utility.statusConnected());
-     
-                            let payload = convertHistoricalDataset(node, data)
-    
-                            if(!payload){
-                                node.warn( utility.warnError(node_name, 'Error writing historical') )
-                            }else{
-                                node.send(utility.createPayload([payload], 'historical'))
-                            }
-                        }
-                    }
-                })
+            if(node.datapoint && msg.topic === 'from' || msg.topic === 'to' || msg.topic === 'resolution'){
+                processSeries()
             }
         })
+
+
+        function processSeries(){
+            handleSeries(function(err, data){
+                if(err){
+                    node.warn( utility.warnError(node_name, err) )
+                    node.status(utility.statusError())
+                }else{
+                    if(data.errors){
+                        node.warn( utility.warnError(node_name, JSON.stringify(data.errors)) )
+                        return null
+                    }else{
+                        node.status(utility.statusConnected());
+    
+                        let payload = convertHistoricalDataset(node, data)
+
+                        if(!Array.isArray(payload)){
+                            node.warn( utility.warnError(node_name, 'Error writing historical') )
+                        }else{
+                            node.send(utility.createPayload(payload, 'historical'))
+                        }
+                    }
+                }
+            })
+        }
+
+
 
         this.on('close', function(){
             clients[config.id] = null

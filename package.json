@@ -24,5 +24,13 @@
     "request": "^2.88.0",
     "swagger-parser": "^8.0.3"
   },
-  "keywords": [ "node-red", "belimo", "mst", "cloud", "api", "scada", "iot" ]
+  "keywords": [
+    "node-red",
+    "belimo",
+    "mst",
+    "cloud",
+    "api",
+    "scada",
+    "iot"
+  ]
 }
