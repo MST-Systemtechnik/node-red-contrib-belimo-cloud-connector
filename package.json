@@ -1,6 +1,41 @@
 {
   "name": "node-red-contrib-belimocloud",
   "version": "0.0.1",
+  "description": "A NODE-RED Belimo-Cloud Library by MST Systemtechnik AG",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "dependencies": {
+    "debug": "^4.1.1",
+    "parse-duration": "^0.1.1",
+    "request": "^2.88.0",
+    "swagger-parser": "^8.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud.git"
+  },
+  "keywords": [
+    "node-red",
+    "cloud",
+    "api",
+    "iot",
+    "mst",
+    "belimo",
+    "scada"
+  ],
+  "author": "MST-Systemtechnik, https://github.com/MST-Systemtechnik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud/issues"
+  },
+  "homepage": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud#readme",
   "node-red": {
     "nodes": {
       "belimo-oauth": "belimo-oauth.js",
@@ -10,31 +45,5 @@
       "belimo-datapoint": "belimo-datapoint.js",
       "belimo-historical": "belimo-historical.js"
     }
-  },
-  "description": "A NODE-RED Belimo-Cloud Library by MST Systemtechnik AG",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud.git"
-  },
-  "homepage": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud#readme",
-  "author": "MST-Systemtechnik, https://github.com/MST-Systemtechnik",
-  "license": "MIT",
-  "dependencies": {
-    "debug": "^4.1.1",
-    "parse-duration": "^0.1.1",
-    "request": "^2.88.0",
-    "swagger-parser": "^8.0.3"
-  },
-  "keywords": [
-    "node-red",
-    "belimo",
-    "mst",
-    "cloud",
-    "api",
-    "scada",
-    "iot"
-  ]
+  }
 }
