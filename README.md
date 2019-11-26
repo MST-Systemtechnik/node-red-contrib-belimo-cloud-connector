@@ -1,4 +1,4 @@
-# node-red-contrib-belimocloud
+# node-red-contrib-belimo-cloud-connector
 
 > NODE-RED Belimo-Cloud Library by MST Systemtechnik AG.
 
@@ -8,7 +8,7 @@ This node allows Node-RED developers to quickly build a connection to the [Belim
 
 ## Installation and Usage
 
-1. Go to your Node-RED users directory and run: `npm install node-red-contrib-belimocloud`
+1. Go to your Node-RED users directory and run: `npm install node-red-contrib-belimo-cloud-connector`
 2. Start Node-RED
 3. Drag-in a belimo-connector and create a oauth configuration
 4. Enter a valid username and password for the belimo-cloud
@@ -22,7 +22,7 @@ To set the debug-mode, use following commands.
 
 ```
 Linux
-DEBUG=belimo-cloud:*
+DEBUG=belimo-cloud:* node-red
 
 PowerShell
 $env:DEBUG = "belimo-cloud:*"
