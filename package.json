@@ -1,5 +1,6 @@
 {
-  "name": "node-red-contrib-belimo-cloud",
+  "name": "node-red-contrib-belimocloud",
+  "version": "0.0.1",
   "node-red": {
     "nodes": {
       "belimo-oauth": "belimo-oauth.js",
@@ -10,16 +11,15 @@
       "belimo-historical": "belimo-historical.js"
     }
   },
-  "version": "0.0.4",
   "description": "A NODE-RED Belimo-Cloud Library by MST Systemtechnik AG",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimo-cloud.git"
+    "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud.git"
   },
-  "homepage": "https://github.com/MST-Systemtechnik/node-red-contrib-belimo-cloud#readme",
+  "homepage": "https://github.com/MST-Systemtechnik/node-red-contrib-belimocloud#readme",
   "author": "MST-Systemtechnik, https://github.com/MST-Systemtechnik",
   "license": "MIT",
   "dependencies": {

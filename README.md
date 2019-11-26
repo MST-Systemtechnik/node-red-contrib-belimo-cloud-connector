@@ -1,4 +1,4 @@
-# node-red-contrib-belimo-cloud
+# node-red-contrib-belimocloud
 
 > NODE-RED Belimo-Cloud Library by MST Systemtechnik AG.
 
@@ -8,7 +8,7 @@ This node allows Node-RED developers to quickly build a connection to the [Belim
 
 ## Installation and Usage
 
-1. Go to your Node-RED users directory and run: `npm install node-red-contrib-belimo-cloud`
+1. Go to your Node-RED users directory and run: `npm install node-red-contrib-belimocloud`
 2. Start Node-RED
 3. Drag-in a belimo-connector and create a oauth configuration
 4. Enter a valid username and password for the belimo-cloud
@@ -76,7 +76,7 @@ Use this node for searching a device by serial-number.
 
 ### Example flow
 
-Below is an example flow that shows how to use the library. The Belimo-Connector handles the connection to the cloud. This connection will be used in any other node. To read a datapoints simple insert a Device-Node, connect it to a Datapoint-Node and deploy it. After that, it's possible to select a device in the Device-Node and a Datapoint in the Datapoint-Node. It has more examples in the `./node-red-contrib-belimo-cloud/examples` folder.
+Below is an example flow that shows how to use the library. The Belimo-Connector handles the connection to the cloud. This connection will be used in any other node. To read a datapoints simple insert a Device-Node, connect it to a Datapoint-Node and deploy it. After that, it's possible to select a device in the Device-Node and a Datapoint in the Datapoint-Node. It has more examples in the `./examples` folder.
 
 #### Example Dependenices
 - dynamic_frontend.json - `npm i node-red-dashboard`
