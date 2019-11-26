@@ -8,9 +8,9 @@ This node allows Node-RED developers to quickly build a connection to the [Belim
 
 ## Installation and Usage
 
-`npm install node-red-contrib-belimo-cloud-connector`
+`npm i node-red-contrib-belimo-cloud-connector`
 
-1. Go to your Node-RED users directory and run the `npm install` command above
+1. You can look for "node-red-contrib-belimo-cloud-connector" in "manage palette", or go to your Node-RED users directory and run the `npm install`-command above 
 2. Start Node-RED
 3. Drag-in a belimo-connector and create a oauth configuration
 4. Enter a valid username and password for the belimo-cloud
