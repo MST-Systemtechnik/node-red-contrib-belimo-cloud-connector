@@ -53,6 +53,7 @@ Uses oauth for the authentification. Theses parameters should be requested from 
 - Username
 - Password
 
+To use the connector, create a oauth-instance in the `NODE-RED Editor`. Each instance uses the given user-credentials. When multiple `Belimo-Connectors` uses the same oauth-instance, the last given user-credentials or events will be set for all others. For managing multiple users, create multiple oauth-instances.
 When the login-parameters should be inserted on the frontend, connect the form-inputs to the connector with the topics `username` and `password`. To send a login or logout event, emit a message with the topics `login` or `logout`.
 
 #### Belimo-Device
