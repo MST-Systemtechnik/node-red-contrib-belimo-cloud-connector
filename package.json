@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-belimo-cloud-connector",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A NODE-RED Belimo-Cloud Library by MST Systemtechnik AG",
   "main": "belimo-connector.js",
   "directories": {

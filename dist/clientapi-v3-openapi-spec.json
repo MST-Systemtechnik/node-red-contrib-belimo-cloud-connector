@@ -2528,7 +2528,7 @@
     "securityDefinitions" : {
       "oauth2_password" : {
         "type" : "oauth2",
-        "tokenUrl" : "https://cloud.belimo.com/oauth/token",
+        "tokenUrl" : "https://id.belimo.com/oauth/token",
         "flow" : "password",
         "scopes" : {
           "public.read" : "Read only access to all resources (public APIs)",
