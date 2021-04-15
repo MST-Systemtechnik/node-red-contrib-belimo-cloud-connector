@@ -3,7 +3,7 @@
  * Customer: Belimo AG
  * Author: mst_gruy
  * Date: 05.11.2019
- * 
+ *
  * Belimo cloud connector
  */
 
@@ -26,7 +26,7 @@ module.exports = function (RED) {
         this.password = this.credentials.password
 
         let node = this
-        
+
         this.oauth.client.on('authenticated', function(){
             node.send(utility.createPayload('Authenticated', 'status'))
             node.status(utility.statusConnected())
@@ -75,7 +75,7 @@ module.exports = function (RED) {
                             node.send(utility.createPayload('Successfull', 'status'))
                         }
                     })
-         
+
                 }
                 return
             }
@@ -87,7 +87,7 @@ module.exports = function (RED) {
                 node.oauth.client.logout()
                 return
             }
-            
+
             // Create the client if optional properties are definied
             if(node.password && node.username ){
                 node.oauth.client.setUsername(node.username)

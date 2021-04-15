@@ -3,10 +3,10 @@
  * Customer: Belimo AG
  * Author: mst_gruy
  * Date: 05.11.2019
- * 
+ *
  * Logic for the belimo-device node. It can requests all devices or a specific device. Each input will be parsed by the topic.
- * 
- * 
+ *
+ *
  */
 
 
@@ -22,9 +22,8 @@ module.exports = function (RED) {
     let clients = {}
 
     function BelimoDevicesNode(config) {
-
         this.interval_id = null
-
+        this.isAuthenticated = false
         RED.nodes.createNode(this, config);
         // Get the oauth node
         this.oauth = RED.nodes.getNode(config.oauth)
@@ -35,6 +34,12 @@ module.exports = function (RED) {
         let node = this
 
         clients[config.id].on('authenticated', function(){
+            if (node.isAuthenticated) {
+                return
+            }
+
+            node.isAuthenticated = true
+
             node.status(utility.statusConnected())
 
             // When login event is emitted, write all devices to output
@@ -61,22 +66,24 @@ module.exports = function (RED) {
             }else{
                 sendNodeMessage(null, null, 'device')
             }
-            
+
         })
 
         clients[config.id].on('logout', function(){
             node.status(utility.statusLogout())
             // Clear dropdown
             node.send( utility.createUiDropdownPayload([], 'devices') )
+            node.isAuthenticated = false
         })
 
         clients[config.id].on('error', function(err){
             node.status(utility.statusError());
+            node.send(utility.createPayload(err, 'error'))
+            node.isAuthenticated = false
         })
 
 
         this.on("input", function(msg) {
-
             // Check datatype of message
             if(typeof msg !== 'object' && msg !== null){
                 node.warn( utility.warnDatatype(node_name, typeof msg, 'object') )
@@ -99,7 +106,6 @@ module.exports = function (RED) {
                     break
                 }
             }
-
         });
 
         this.on('close', function(){
@@ -108,9 +114,9 @@ module.exports = function (RED) {
 
         /**
          * Send the payload and change the status according the error or succsess
-         * @param {string} err 
-         * @param {object} data 
-         * @param {string} topic 
+         * @param {string} err
+         * @param {object} data
+         * @param {string} topic
          */
         function sendNodeMessage(err, data, topic){
             if(err){
@@ -162,7 +168,7 @@ module.exports = function (RED) {
                 callback(err, devices)
             }else{
                 // Create the jobs for the async requests to get all devices
-                let jobs = [] 
+                let jobs = []
                 for(let count = LIMIT; count <= total; count += LIMIT ){
                     jobs.push(http_api_devices + `?limit=${ LIMIT }&offset=${ count }`)
                 }
@@ -177,7 +183,7 @@ module.exports = function (RED) {
                                     devices.data.push(body.data[device_index])
                                 }
                             }
-                            next()    
+                            next()
                         }
                     });
                 }, function(err){

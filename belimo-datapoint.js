@@ -3,7 +3,7 @@
  * Customer: Belimo AG
  * Author: mst_gruy
  * Date: 05.11.2019
- * 
+ *
  * Belimo-datapoint node logic. To get the actual data, it will open a change-stream subscription.
  */
 
@@ -32,13 +32,11 @@ module.exports = function (RED) {
 
         this.status(utility.statusLogout())
 
-        let node = this    
-    
+        let node = this
+
         if(config.dataprofile_value){
             this.datapoint = JSON.parse(config.dataprofile_value)
         }
-
-
 
         clients[config.id].on('authenticated', function(){
             node.status(utility.statusConnected())
@@ -50,7 +48,6 @@ module.exports = function (RED) {
             }
             node.subscription = null
             delete node.subscription
-            node.datapoint = null
             node.status(utility.statusLogout())
             // Clear dropdown
             node.send( utility.createUiDropdownPayload([], 'dataprofile') )
@@ -63,14 +60,12 @@ module.exports = function (RED) {
 
         this.on('input', function(msg){
 
-            
             // Check datatype of message
             if(typeof msg !== 'object' && msg !== null){
                 node.warn( utility.warnDatatype(node_name, typeof msg, 'object') )
                 node.status(utility.statusError())
                 return null
             }
-
 
             if(msg.hasOwnProperty('topic')){
                 switch(msg.topic){
@@ -114,7 +109,7 @@ module.exports = function (RED) {
                         }
 
                         node.datapoint = null
-        
+
                         for(let dp_index in dataprofiles[config.id].datapoints){
                             if(dataprofiles[config.id].datapoints[dp_index].id === msg.payload){
                                 node.datapoint = dataprofiles[config.id].datapoints[dp_index]
@@ -197,7 +192,7 @@ module.exports = function (RED) {
             if(node.subscription){
                 node.subscription.destroyIfActive()
             }
-     
+
             node.subscription = null
             delete node.subscription
 
@@ -235,7 +230,7 @@ module.exports = function (RED) {
                     break
                 }
             }
-            
+
             name = access ? name + ' [' + access + ']' : name
             o[name] = item.id
             options.push(o)
@@ -246,9 +241,9 @@ module.exports = function (RED) {
 
     /**
      * Request the dataprofile
-     * @param {Client} client 
+     * @param {Client} client
      * @param {string} pathname /definitions/dataprofiles/energyvalve3/1.2
-     * @param {function} callback 
+     * @param {function} callback
      */
     function getDataprofileByReq(client, pathname, callback){
         if(!client){
@@ -272,9 +267,9 @@ module.exports = function (RED) {
 
     /**
      * Create the datapayload. The keys are written like default.displayname. Remove the string before the point, to get a readable object
-     * @param {string} device_id 
-     * @param {object} datapoint 
-     * @param {string | bool | int | float} value 
+     * @param {string} device_id
+     * @param {object} datapoint
+     * @param {string | bool | int | float} value
      */
     function createDataPayload(device_id, datapoint, value){
 
@@ -303,12 +298,12 @@ module.exports = function (RED) {
 
 
     /**
-     * Write a datapoint to the belimo cloud. When 
-     * @param {object} instance 
-     * @param {object | string | bool | number} value 
-     * 
-     * 
-     * Example value to write multiple: 
+     * Write a datapoint to the belimo cloud. When
+     * @param {object} instance
+     * @param {object | string | bool | number} value
+     *
+     *
+     * Example value to write multiple:
         {
             "mergeable" : false,
             "cancelable" : true,
@@ -321,7 +316,7 @@ module.exports = function (RED) {
 
        To write the selected datapoint value : string | bool | number
 
-     * @param {function} callback 
+     * @param {function} callback
      */
     function writeDatapoint(node, value, callback){
 
@@ -363,12 +358,12 @@ module.exports = function (RED) {
 
 
         /**
-     * Write a datapoint to the belimo cloud. When 
-     * @param {object} instance 
-     * @param {object} value 
-     * 
-     * 
-     * Example value to write multiple: 
+     * Write a datapoint to the belimo cloud. When
+     * @param {object} instance
+     * @param {object} value
+     *
+     *
+     * Example value to write multiple:
             {
                 "datapoints" : {
                     "metadata.1001" : "Basement B14.22",
@@ -377,7 +372,7 @@ module.exports = function (RED) {
                 }
             }
 
-     * @param {function} callback 
+     * @param {function} callback
      */
     function writeMetadata(node, value, callback){
 
@@ -469,10 +464,10 @@ module.exports = function (RED) {
                 res.json({ err : 'Dataprofile not found. Please connect a belimo-device-node, select a device and try it again or enter a reference-path.'})
                 return null
             }
-    
+
             res.json(dataprofiles[req.params.node_id])
         }
-  
+
     })
 
 
@@ -496,7 +491,7 @@ module.exports = function (RED) {
     })
 
 
-        
+
     RED.nodes.registerType("belimo-datapoint", BelimoDatapointNode);
 }
 
