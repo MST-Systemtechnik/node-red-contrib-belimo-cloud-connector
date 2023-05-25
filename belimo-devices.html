@@ -8,7 +8,6 @@
  * View for the belimo-device node.
  */
 -->
-
 <script type="text/javascript">
     RED.nodes.registerType('belimo-devices', {
         category: 'Belimo Cloud',
@@ -33,6 +32,101 @@
         }
     });
 
+    function getDeviceNameFromOptionLabel(optionLabel) {
+        const lastSlash = optionLabel.lastIndexOf('/ ')
+        return optionLabel.substring(lastSlash + 1);
+    }
+	
+	function buildDevicesGroups(response) {
+		const devices = response.data
+		
+		// Device groups structure => { ownerDisplayName: { dataprofileDisplayName: { deviceDisplayName: { id, displayName } } } }
+		const deviceGroups = {}
+		
+		// Append the options
+		for (let device_idx = 0; device_idx < devices.length; device_idx += 1) {
+			const { id, displayName, owner, dataprofile } = devices[device_idx]
+			const ownerDisplayName = owner ? owner.displayName : 'Unknown owner'
+			const dataprofileDisplayName = dataprofile ? dataprofile.displayName : 'Unknown dataprofile'
+			
+			deviceGroups[ownerDisplayName] = deviceGroups[ownerDisplayName] || {}
+			deviceGroups[ownerDisplayName][dataprofileDisplayName] = deviceGroups[ownerDisplayName][dataprofileDisplayName] || {}
+			deviceGroups[ownerDisplayName][dataprofileDisplayName][displayName] = {
+				id,
+				displayName: displayName || id,
+			}
+		}
+		
+		return deviceGroups
+	}
+
+    function renderTreeNode(self, name, hasChilds, parentNode, device_id) {
+        const li =  $('<li />')
+        const elements = []
+        const label = $('<span />').addClass(hasChilds ? 'tree-caret' : '').on("click", (ev) => {
+            const { target } = ev
+            if (hasChilds) {
+                const parent = target.parentElement.querySelector(".tree-nested")
+                if (parent) {
+                    parent.classList.toggle("tree-active")
+                }
+                target.classList.toggle("tree-caret-down")
+            }
+        });
+
+        if (hasChilds) {
+            label.addClass('tree-caret')
+            label.text(name)
+        } else {
+            const linkIcon = $('<i />').addClass('fa fa-plus').addClass('icon-gutter')
+            const linkLabel = $('<span />').text(name)
+            const link = $('<a />').attr('href', '#').append([linkIcon, linkLabel]).on('click', (ev) => {
+                ev.preventDefault()
+                if (device_id) {
+                    // set device id to variable and to select
+                    self.device_id = device_id
+                    $('#node-input-device_id').val(device_id)
+
+                    // get option label and set variable
+                    const deviceName = $('#node-input-device_id').find(':selected').text()
+                    self.name = getDeviceNameFromOptionLabel(deviceName);
+
+                    // display the selected device because select option is to long
+                    $('#selected-device').text(deviceName)
+
+                    $.get('belimo-cloud/device-node-changed/' + self.id + '?deviceId=' + device_id)
+                }
+            })
+            label.append(link)
+        }
+
+        elements.push(label)
+        
+        let nestedParent = undefined;
+        if (hasChilds) {
+            nestedParent = $('<ul />').addClass('tree-nested tree')
+            elements.push(nestedParent)
+        }
+
+        li.append(elements)
+        parentNode.append(li)
+        return nestedParent
+    }
+
+    function renderDevicesTree(self, treeSelector, groups) {
+        const rootNode = $('<ul />').addClass('tree')
+        Object.keys(groups).sort().forEach((groupName) => {
+            const groupNode = renderTreeNode(self, groupName, true, rootNode)
+            Object.keys(groups[groupName]).sort().forEach((dataprofileName) => {
+                const dataprofileNode = renderTreeNode(self, dataprofileName, true, groupNode)
+                Object.keys(groups[groupName][dataprofileName]).sort().forEach((deviceName) => {
+                    const device = groups[groupName][dataprofileName][deviceName]
+                    renderTreeNode(self, deviceName, false, dataprofileNode, device.id)
+                })
+            })
+        })
+        $(treeSelector).append(rootNode)
+    }
 
     function buildSelectDevices(self, callback){
 
@@ -40,30 +134,58 @@
         $("#node-input-device_id").find('option').not(":nth-child(1)").not(":nth-child(2)").remove()
 
         // Request
-        $.getJSON('belimo-cloud/device-node/' + self.id,function(data) {
+        $.getJSON('belimo-cloud/device-node/' + self.id, function(data) {
 
             // No devices received
             if(data.err){  
                 RED.notify(data.err, "error")    
                 return null
             }
+			
+			const groups = buildDevicesGroups(data)
+			renderDevicesTree(self, '#device-tree', groups)
 
             // Append the options
+            const options = []
+
             for(var device_index in data.data){
-                $('#node-input-device_id').append(
-                    $('<option>', 
-                        { 
-                            value: data.data[device_index].id, 
-                            text: data.data[device_index].displayName
-                        }
-                    ).prop('selected', data.data[device_index].id === self.device_id)
-                );
+                const device = data.data[device_index]
+                const { owner, displayName, dataprofile } = device
+                options.push({ 
+                    value: data.data[device_index].id, 
+                    text: `${owner.displayName} / ${dataprofile.displayName} / ${displayName}`
+                })
             }
 
+            options.sort((a,b) => {
+                if (a.text < b.text) {
+                    return -1
+                }
+                if (a.text > b.text) {
+                    return 1
+                }
+                return 0
+            })
+
+            options.forEach((option) => {
+                const isSelected = option.value === self.device_id
+                $('#node-input-device_id').append(
+                    $('<option>', option).prop('selected', option.value === self.device_id)
+                );
+
+                if (isSelected) {
+                    self.name = getDeviceNameFromOptionLabel(option.text);
+                    $('#selected-device').text(option.text)
+                }
+            })
+
+            $('#loading-container').addClass('hidden')
 
             // Display the name of the selected device
             $('#node-input-device_id').change(function(){
-                self.name = $(this).find(':selected').text()
+                const deviceName = $(this).find(':selected').text()
+                self.name = getDeviceNameFromOptionLabel(deviceName);
+                $('#selected-device').text(deviceName)
                 $.get('belimo-cloud/device-node-changed/' + self.id + '?deviceId=' + $(this).val())
             })
         })
@@ -84,6 +206,25 @@
             <option value="none">No device</option>
             <option value="all">All devices</option>
         </select>
+    </div>
+
+    <div class="form-row">
+        <label for="selected-device"></label>
+        <div>
+            <span id="selected-device"></span>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <h5>Belimo Digital Ecosystem</h5>
+        <div id="loading-container">
+            <div class="flex-center">
+                <span class="loader"></span>
+                <span>Fetching devices...</span>
+            </div>
+        </div>
+        <div id="device-tree">
+        </div>
     </div>
 
 </script>
@@ -162,3 +303,76 @@
     </ul>
 
 </script>
+
+<style>
+.tree {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-caret {
+  cursor: pointer;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none;
+}
+
+.tree-caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.tree-caret-down::before {
+  -ms-transform: rotate(90deg); /* IE 9 */
+  -webkit-transform: rotate(90deg); /* Safari */
+  transform: rotate(90deg);  
+}
+
+.tree-nested {
+  display: none;
+}
+
+.tree-active {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.icon-gutter {
+  padding-right: 0.5rem;
+}
+
+/* Spinners */
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+</style>
