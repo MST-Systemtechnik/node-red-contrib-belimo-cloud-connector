@@ -12,67 +12,67 @@
     RED.nodes.registerType('belimo-devices', {
         category: 'Belimo Cloud',
         defaults: {
-            name : { value : "" },
-            oauth: {value:"", type: "belimo-oauth", required:true},
-            device_id : { value : "" }
+            name: { value: '' },
+            oauth: { value: '', type: 'belimo-oauth', required: true },
+            device_id: { value: '' }
         },
         inputs: 1,
         outputs: 1,
-        icon: "font-awesome/fa-cube",
-        color: "#FD6701",
+        icon: 'font-awesome/fa-cube',
+        color: '#FD6701',
         label: function () {
-            return this.name ? 'Device: ' + this.name : "Belimo-devices"
+            return this.name ? 'Device: ' + this.name : 'Belimo-devices'
         },
-        labelStyle: function() {
-            return this.name ? "node_label_italic":""
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : ''
         },
         oneditprepare: function () {
             // Build the selection options by the devices
             buildSelectDevices(this)
         }
-    });
+    })
 
     function getDeviceNameFromOptionLabel(optionLabel) {
         const lastSlash = optionLabel.lastIndexOf('/ ')
-        return optionLabel.substring(lastSlash + 1);
+        return optionLabel.substring(lastSlash + 1)
     }
-	
-	function buildDevicesGroups(response) {
-		const devices = response.data
-		
-		// Device groups structure => { ownerDisplayName: { dataprofileDisplayName: { deviceDisplayName: { id, displayName } } } }
-		const deviceGroups = {}
-		
-		// Append the options
-		for (let device_idx = 0; device_idx < devices.length; device_idx += 1) {
-			const { id, displayName, owner, dataprofile } = devices[device_idx]
-			const ownerDisplayName = owner ? owner.displayName : 'Unknown owner'
-			const dataprofileDisplayName = dataprofile ? dataprofile.displayName : 'Unknown dataprofile'
-			
-			deviceGroups[ownerDisplayName] = deviceGroups[ownerDisplayName] || {}
-			deviceGroups[ownerDisplayName][dataprofileDisplayName] = deviceGroups[ownerDisplayName][dataprofileDisplayName] || {}
-			deviceGroups[ownerDisplayName][dataprofileDisplayName][displayName] = {
-				id,
-				displayName: displayName || id,
-			}
-		}
-		
-		return deviceGroups
-	}
+
+    function buildDevicesGroups(response) {
+        const devices = response.data
+
+        // Device groups structure => { ownerDisplayName: { dataprofileDisplayName: { deviceDisplayName: { id, displayName } } } }
+        const deviceGroups = {}
+
+        // Append the options
+        for (let device_idx = 0; device_idx < devices.length; device_idx += 1) {
+            const { id, displayName, owner, dataprofile } = devices[device_idx]
+            const ownerDisplayName = owner ? owner.displayName : 'Unknown owner'
+            const dataprofileDisplayName = dataprofile ? dataprofile.displayName : 'Unknown dataprofile'
+
+            deviceGroups[ownerDisplayName] = deviceGroups[ownerDisplayName] || {}
+            deviceGroups[ownerDisplayName][dataprofileDisplayName] = deviceGroups[ownerDisplayName][dataprofileDisplayName] || {}
+            deviceGroups[ownerDisplayName][dataprofileDisplayName][displayName] = {
+                id,
+                displayName: displayName || id,
+            }
+        }
+
+        return deviceGroups
+    }
 
     function renderTreeNode(self, name, hasChilds, parentNode, device_id) {
-        const li =  $('<li />')
+        const li = $('<li />')
         const elements = []
-        const label = $('<span />').addClass(hasChilds ? 'tree-caret' : '').on("click", (ev) => {
+        const label = $('<span />').addClass(hasChilds ? 'tree-caret' : '').on('click', (ev) => {
             const { target } = ev
             if (hasChilds) {
-                const parent = target.parentElement.querySelector(".tree-nested")
+                const parent = target.parentElement.querySelector('.tree-nested')
                 if (parent) {
-                    parent.classList.toggle("tree-active")
+                    parent.classList.toggle('tree-active')
                 }
-                target.classList.toggle("tree-caret-down")
+                target.classList.toggle('tree-caret-down')
             }
-        });
+        })
 
         if (hasChilds) {
             label.addClass('tree-caret')
@@ -89,7 +89,7 @@
 
                     // get option label and set variable
                     const deviceName = $('#node-input-device_id').find(':selected').text()
-                    self.name = getDeviceNameFromOptionLabel(deviceName);
+                    self.name = getDeviceNameFromOptionLabel(deviceName)
 
                     // display the selected device because select option is to long
                     $('#selected-device').text(deviceName)
@@ -101,8 +101,8 @@
         }
 
         elements.push(label)
-        
-        let nestedParent = undefined;
+
+        let nestedParent = undefined
         if (hasChilds) {
             nestedParent = $('<ul />').addClass('tree-nested tree')
             elements.push(nestedParent)
@@ -128,36 +128,36 @@
         $(treeSelector).append(rootNode)
     }
 
-    function buildSelectDevices(self, callback){
+    function buildSelectDevices(self, callback) {
 
         // Clear the options to rebuild after the request
-        $("#node-input-device_id").find('option').not(":nth-child(1)").not(":nth-child(2)").remove()
+        $('#node-input-device_id').find('option').not(':nth-child(1)').not(':nth-child(2)').remove()
 
         // Request
-        $.getJSON('belimo-cloud/device-node/' + self.id, function(data) {
+        $.getJSON('belimo-cloud/device-node/' + self.id, function (data) {
 
             // No devices received
-            if(data.err){  
-                RED.notify(data.err, "error")    
+            if (data.err) {
+                RED.notify(data.err, 'error')
                 return null
             }
-			
-			const groups = buildDevicesGroups(data)
-			renderDevicesTree(self, '#device-tree', groups)
+
+            const groups = buildDevicesGroups(data)
+            renderDevicesTree(self, '#device-tree', groups)
 
             // Append the options
             const options = []
 
-            for(var device_index in data.data){
+            for (var device_index in data.data) {
                 const device = data.data[device_index]
                 const { owner, displayName, dataprofile } = device
-                options.push({ 
-                    value: data.data[device_index].id, 
+                options.push({
+                    value: data.data[device_index].id,
                     text: `${owner.displayName} / ${dataprofile.displayName} / ${displayName}`
                 })
             }
 
-            options.sort((a,b) => {
+            options.sort((a, b) => {
                 if (a.text < b.text) {
                     return -1
                 }
@@ -171,10 +171,10 @@
                 const isSelected = option.value === self.device_id
                 $('#node-input-device_id').append(
                     $('<option>', option).prop('selected', option.value === self.device_id)
-                );
+                )
 
                 if (isSelected) {
-                    self.name = getDeviceNameFromOptionLabel(option.text);
+                    self.name = getDeviceNameFromOptionLabel(option.text)
                     $('#selected-device').text(option.text)
                 }
             })
@@ -182,9 +182,9 @@
             $('#loading-container').addClass('hidden')
 
             // Display the name of the selected device
-            $('#node-input-device_id').change(function(){
+            $('#node-input-device_id').change(function () {
                 const deviceName = $(this).find(':selected').text()
-                self.name = getDeviceNameFromOptionLabel(deviceName);
+                self.name = getDeviceNameFromOptionLabel(deviceName)
                 $('#selected-device').text(deviceName)
                 $.get('belimo-cloud/device-node-changed/' + self.id + '?deviceId=' + $(this).val())
             })
@@ -244,7 +244,7 @@
 
     <dl class="message-properties">
             <dt>payload <span class="property-type">Topic : devices | object</span></dt>
-            <dd>Object with device-names and deivce-id's</dd>
+            <dd>Object with device-names and deivce-id"s</dd>
         </dl>
 
 
@@ -258,12 +258,12 @@
     To handle different inputs, a specific topic needs to be assigned to the payload object. Check the description bellow.
     <pre>
         {
-            topic : '...',
-            payload: ''
+            topic : "...",
+            payload: ""
         }
     </pre>
     
-    A device can be selected in the dropdown-list, or while emit a deviceId in the input. It's possible to send all devices to the output, while selecting the option 'all'.
+    A device can be selected in the dropdown-list, or while emit a deviceId in the input. It"s possible to send all devices to the output, while selecting the option "all".
 
     Example payload all devices
     <pre>
@@ -305,74 +305,80 @@
 </script>
 
 <style>
-.tree {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
+    .tree {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
 
-.tree-caret {
-  cursor: pointer;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none;
-}
+    .tree-caret {
+        cursor: pointer;
+        -webkit-user-select: none;
+        /* Safari 3.1+ */
+        -moz-user-select: none;
+        /* Firefox 2+ */
+        -ms-user-select: none;
+        /* IE 10+ */
+        user-select: none;
+    }
 
-.tree-caret::before {
-  content: "\25B6";
-  color: black;
-  display: inline-block;
-  margin-right: 6px;
-}
+    .tree-caret::before {
+        content: "\25B6";
+        color: black;
+        display: inline-block;
+        margin-right: 6px;
+    }
 
-.tree-caret-down::before {
-  -ms-transform: rotate(90deg); /* IE 9 */
-  -webkit-transform: rotate(90deg); /* Safari */
-  transform: rotate(90deg);  
-}
+    .tree-caret-down::before {
+        -ms-transform: rotate(90deg);
+        /* IE 9 */
+        -webkit-transform: rotate(90deg);
+        /* Safari */
+        transform: rotate(90deg);
+    }
 
-.tree-nested {
-  display: none;
-}
+    .tree-nested {
+        display: none;
+    }
 
-.tree-active {
-  display: block;
-}
+    .tree-active {
+        display: block;
+    }
 
-.hidden {
-  display: none;
-}
+    .hidden {
+        display: none;
+    }
 
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
+    .flex-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
 
-.icon-gutter {
-  padding-right: 0.5rem;
-}
+    .icon-gutter {
+        padding-right: 0.5rem;
+    }
 
-/* Spinners */
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid;
-  border-color: #FF3D00 transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
+    /* Spinners */
+    .loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid;
+        border-color: #FF3D00 transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+    }
 
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-} 
+    @keyframes rotation {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
