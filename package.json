@@ -36,7 +36,11 @@
     "url": "https://github.com/MST-Systemtechnik/node-red-contrib-belimo-cloud-connector/issues"
   },
   "homepage": "https://github.com/MST-Systemtechnik/node-red-contrib-belimo-cloud-connector#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "node-red": {
+    "version": ">=2.0.0",
     "nodes": {
       "belimo-oauth": "belimo-oauth.js",
       "belimo-connector": "belimo-connector.js",
